@@ -1,4 +1,4 @@
-#Generado el 09-09-2018
+#Generado el 10-09-2018
 from network import LoRa
 import socket
 import machine
@@ -50,7 +50,7 @@ def pulsaciones(color):
 #    pycom.rgbled(0xfffe02)#Amarillo          gps ok
 #    pycom.rgbled(0x7f0000)#Rojo suave       gps off
 #    pycom.rgbled(0x7f700)#verde             encendido
-#   pycom.rgbled(0xfb0c86) #rosa
+#    pycom.rgbled(0xfb0c86) #rosa
 
 def ConfirmacionLed(funcion):
     funciones={'wifi':0x0007F,'recibido':0xfffe02,'nogps':0x7f0000,'encendido':0x7f700,'sendalert':0xC011EB}# wifi(azul) | recibido(Amarillo) | nogps(rojo) | encendido(verde) | sendalert(lila) -gpsok()
@@ -88,9 +88,6 @@ def enviarAlertas(s,listalertas=[]):
             ConfirmacionLed('sendalert')
             print("Asi esta la lista: ",listalertas)
     return listalertas
-        #print("x:",x,"-b:",b)
-        #c = j[x].split('-')
-        #print("n:",c[0],"mensaje:",c[1])
 
 def inciarAlertas(lora,s):
     listalertas=[]
@@ -119,7 +116,6 @@ def inciarAlertas(lora,s):
             re=0
 
 def iniciarSeguidores(lora,s):
-
     s.setblocking(False)
     tiempo = time.time()
     tmp=tiempo
