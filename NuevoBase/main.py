@@ -92,10 +92,8 @@ def enviarAlertas(s,listalertas=[]):
         #c = j[x].split('-')
         #print("n:",c[0],"mensaje:",c[1])
 
-def inciarAlertas():
+def inciarAlertas(lora,s):
     listalertas=[]
-    lora = LoRa(mode=LoRa.LORA)
-    s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
     s.setblocking(False)
     tiempo=time.time()
     tmp2=tiempo
@@ -105,14 +103,14 @@ def inciarAlertas():
         tiempo=time.time()
         if existe('alertas.txt'):
             if re==0:
-                listalertas = buscarAlertas(s,listalertas)
+                listalertas = enviarAlertas(s,listalertas)
                 tmp2=tiempo
                 re+=1
             elif tiempo-tmp2>=60 and re !=0:
                 tmp2=tiempo
                 print("Reenviando la lista de alertas")
                 del listalertas[:] #Borro la lista y reenvio leyendo de nuevo.
-                listalertas = buscarAlertas(s,listalertas)
+                listalertas = enviarAlertas(s,listalertas)
             else:
                 print("Alertas existe, pero aun no ha pasado los 60 segundos=", tiempo-tmp2)
         else:
@@ -120,8 +118,8 @@ def inciarAlertas():
             del listalertas[:]
             re=0
 
-def iniciarSeguidores():
-    s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+def iniciarSeguidores(lora,s):
+
     s.setblocking(False)
     tiempo = time.time()
     tmp=tiempo
@@ -148,17 +146,16 @@ def iniciarSeguidores():
         else:
             print("- No hay Seguidores(Archivo 'seguidores.txt' no existe.)")
 
-def iniciarCorredores():
-    actualizado = 0
+def iniciarCorredores(lora,s):
     corredores=[]
-    s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
-    s.setblocking(True)
     while True:
+        actualizado = 0
+        s.setblocking(True)
         data = s.recv(64) #socket.recv (bufsize [, flags])  Reciba datos del socket. El valor de retorno es una cadena que representa los datos recibidos. La cantidad máxima de datos que se recibirán a la vez se especifica mediante bufsize
         j =data.decode("utf-8")
         j = j.split('-')
         if j[0] == 'witeklab':
-            print(data)
+            print('mensaje entrante->',data)
             for c in range(len(corredores)):
                 if j[2] in corredores[c]:
                     corredores[c]=([j[2],j[3],j[4],j[5]])
@@ -183,14 +180,15 @@ def iniciarCorredores():
 
 ###     Variables
 ssid = "Gateway1"
-
+lora = LoRa(mode=LoRa.LORA)
+s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 ###     Main
 pycom.heartbeat(False)
 resetDocument()
 iniciarWifi(ssid)
 print('1-> Iniciamos primer hilo el registro de corredores:')
-_thread.start_new_thread(iniciarCorredores,())
+a = _thread.start_new_thread(iniciarCorredores,(lora,s,))
 print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
-_thread.start_new_thread(inciarAlertas,())
+b = _thread.start_new_thread(inciarAlertas,(lora,s,))
 print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
-_thread.start_new_thread(iniciarSeguidores,())
+c = _thread.start_new_thread(iniciarSeguidores,(lora,s))
