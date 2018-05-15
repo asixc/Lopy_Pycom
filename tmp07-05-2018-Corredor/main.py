@@ -8,10 +8,7 @@ import time
 import utime
 import pycom
 
-
-
 ### Funciones
-
 def iniciarWifi(dorsalDefault):
     try:
         import network
@@ -46,10 +43,9 @@ def ConfirmacionLed(funcion):
     funciones={'bluetooth':0x0007F,'gpsok':0xfffe02,'nogps':0x7f0000,'encendido':0x7f700,'sendalert':0xC011EB,'buscandoalerta':0xffffff}# wifi(azul) | gpsok(Amarillo) | nogps(rojo) | encendido(verde) | sendalert(lila)| -gpsok(amarillo) | buscandoalerta(blanco)
     pulsaciones(funciones[funcion])
 
-
 def resetDocument():
     #Lista de documentos posible: alerta.txt | dorsal.txt | myposition.txt | registro.txt | seguidores.txt
-    lista = ['alerta','dorsal','myposition','registro','seguidores']
+    lista = ['alerta','dorsal','myposition','registro','seguidores','confirmacionEnlace']
     for i in lista:
         if existe(i+'.txt'):
             print('Borrando',i+'.txt')
@@ -113,6 +109,17 @@ def buscarMensajes(dorsal):
                 f = open ('seguidores.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
                 f.write(dor)
                 f.close()
+        elif ide[0] == 'baseConfirma':
+            dor = ide[1]
+            ide = ide[1].split(';')
+            print("Dorsal destino:",ide[0])
+            if ide[0]==dorsal:
+                print("dentro del mismo dorsal: ",dor)
+                ConfirmacionLed('bluetooth')
+                f = open ('confirmacionEnlace.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
+                f.write(dor)
+                f.close()
+
 def recogerPosGPSMovil():
     x = open('myposition.txt')
     x = x.read().split(';')
@@ -139,16 +146,13 @@ def enviarPos(dorsal,dorsalDefault):
         x = "witeklab-"+str(j)+"-"+str(dorsalDefault)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])
         #x = "witeklab-"+str(j)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])  Antiguo!
 
-
         s.send(x)
         ConfirmacionLed('gpsok')
         print("Coordenadas enviadas:",x)
         j+=1
-        #time.sleep(5)
         time.sleep(30) #Pausa entre toma de coordenadas.
 
 ###     Variables
-
 dorsal = "R6"
 dorsalDefault = "R6"
 

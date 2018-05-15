@@ -1,5 +1,4 @@
 # boot.py -- run on boot-up
-# boot.py -- run on boot-up
 from network import LoRa
 import socket
 import machine
@@ -41,7 +40,7 @@ def pulsaciones(color):
 #    pycom.rgbled(0xfffe02)#Amarillo          gps ok
 #    pycom.rgbled(0x7f0000)#Rojo suave       gps off
 #    pycom.rgbled(0x7f700)#verde             encendido
-#   pycom.rgbled(0xfb0c86) #rosa
+#    pycom.rgbled(0xfb0c86) #rosa
 
 def ConfirmacionLed(funcion):
     funciones={'wifi':0x0007F,'recibido':0xfffe02,'nogps':0x7f0000,'encendido':0x7f700,'sendalert':0xC011EB}# wifi(azul) | recibido(Amarillo) | nogps(rojo) | encendido(verde) | sendalert(lila) -gpsok()
@@ -79,9 +78,7 @@ def buscarAlertas(s,listalertas=[]):
             ConfirmacionLed('sendalert')
             print("Asi esta la lista: ",listalertas)
     return listalertas
-        #print("x:",x,"-b:",b)
-        #c = j[x].split('-')
-        #print("n:",c[0],"mensaje:",c[1])
+
 def resetDocument():
     #Lista de documentos posible: alerta.txt | dorsal.txt | myposition.txt | registro.txt | seguidores.txt
     lista = ['alerta','dorsal','myposition','registro','seguidores','alertapersonalizada']
@@ -175,7 +172,7 @@ while True:
     print(corredores)
 
     #linea = j[2]+";"+j[1]+";"+j[3]";"+j[4]+"|" #ID;NºRegistro;Latitud;Longitud|
-    f = open ('registro.txt', 'w')#Modo 'a' Para añadir no sobre escribir
+    f = open ('registro.txt', 'w')#Modo 'a' Para añadir no sobreescribir
     for c in range(len(corredores)):
         if len(corredores)!=0:
             d = corredores[c]
