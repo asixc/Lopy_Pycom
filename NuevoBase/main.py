@@ -16,17 +16,18 @@ def existe(arg):
     except:
         return False
 
-def iniciarWifi(ssid):
+def iniciarWifi(pssid):
     try:
         import network
         from network import WLAN
         wlan = network.WLAN(mode=network.WLAN.STA)
-        wlan.init(mode=WLAN.AP, ssid=ssid, auth=(WLAN.WPA2,'witeklab@2018'), channel=7, antenna=WLAN.INT_ANT)
+        wlan.init(mode=WLAN.AP, ssid=pssid, auth=(WLAN.WPA2,'witeklab@2018'), channel=7, antenna=WLAN.INT_ANT)
         from network import Server
         server = Server(login=('micro', 'python'), timeout=600)
         server.timeout(300)
         server.timeout()
         server.isrunning()
+        ConfirmacionLed('wifi')
         return True
     except:
         return False
@@ -175,13 +176,13 @@ def iniciarCorredores(lora,s):
         f.close()
 
 ###     Variables
-ssid = "Gateway1"
+pssid = "Gateway1"
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 ###     Main
 pycom.heartbeat(False)
 resetDocument()
-iniciarWifi(ssid)
+iniciarWifi(pssid)
 print('1-> Iniciamos primer hilo el registro de corredores:')
 a = _thread.start_new_thread(iniciarCorredores,(lora,s,))
 print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
