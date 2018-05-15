@@ -168,7 +168,8 @@ def iniciarCorredores(lora,s):
                         break
                 if actualizado==0:
                     corredores.append([j[2],j[3],j[4],j[5]])
-                    msj = "baseConfirma-"+
+                    msj = "baseConfirma-"+j[2]+";OK"
+                    s.send(msj)
                     ConfirmacionLed('recibido')
 
             print("Corredores:",len(corredores))

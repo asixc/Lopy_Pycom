@@ -8,6 +8,14 @@ import time
 import utime
 import pycom
 
+from machine import RTC
+from machine import SD
+from machine import Timer
+from L76GNSS import L76GNSS
+from pytrack import Pytrack
+import gc
+gc.enable()
+
 #Iniciar nuevo thread:  _thread.start_new_thread
 # setup LoRa:
 from network import LoRa
@@ -28,6 +36,7 @@ def iniciarWifi(dorsalDefault):
         server.timeout(300)
         server.timeout()
         server.isrunning()
+        ConfirmacionLed('wifi')
         return True
     except:
         return False
@@ -54,7 +63,7 @@ def ConfirmacionLed(funcion):
 
 def resetDocument():
     #Lista de documentos posible: alerta.txt | dorsal.txt | myposition.txt | registro.txt | seguidores.txt
-    lista = ['alerta','dorsal','myposition','registro','seguidores']
+    lista = ['alerta','dorsal','myposition','registro','seguidores','confirmacionEnlace']
     for i in lista:
         if existe(i+'.txt'):
             print('Borrando',i+'.txt')
@@ -118,20 +127,44 @@ def buscarMensajes(dorsal):
                 f = open ('seguidores.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
                 f.write(dor)
                 f.close()
+        elif ide[0] == 'baseConfirma':
+            dor = ide[1]
+            ide = ide[1].split(';')
+            print("Dorsal destino:",ide[0])
+            if ide[0]==dorsal:
+                print("dentro del mismo dorsal: ",dor)
+                ConfirmacionLed('bluetooth')
+                f = open ('confirmacionEnlace.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
+                f.write(dor)
+                f.close()
+
 def recogerPosGPSMovil():
     x = open('myposition.txt')
     x = x.read().split(';')
     lat_d = x[0]
     lon_d = x[1]
     return(lat_d, lon_d)
-
+def buscarPos():
+    try:
+        py = Pytrack()
+        l76 = L76GNSS(py, timeout=30)
+        coord = l76.coordinates()
+        return coord
+    except:
+        print('** Algo ha fallado en buscarPos **')
+        coord = (0,0)
+        return coord
 def enviarPos(dorsal,dorsalDefault):
     j=0
     while True:
         if existe('myposition.txt'):
             coord = recogerPosGPSMovil()
         else:
-            coord = (0,0)
+            coord = buscarPos()
+            print('Coordenadas recibidas->',coord)
+            p = str(coord[0])
+            if p =='None':
+                coord = (0,0)
         if existe('dorsal.txt'):
             a = open('dorsal.txt')
             dorsal = a.read()
@@ -147,9 +180,8 @@ def enviarPos(dorsal,dorsalDefault):
         time.sleep(30) #Pausa entre toma de coordenadas.
 
 ###     Variables
-
-dorsal = "R1"
-dorsalDefault =  "R1"
+dorsal = "RPRUEBA"
+dorsalDefault =  dorsal
 
 ###     Main
 pycom.heartbeat(False)
@@ -159,4 +191,4 @@ print('1-> Iniciamos primer hilo Con la busqueda de mensajes:')
 _thread.start_new_thread(buscarMensajes, (dorsal,))
 print('2-> Iniciamos la busqueda de GPS (Fichero o localización)')
 _thread.start_new_thread(enviarPos,(dorsal,dorsalDefault,))
-print("-----")
+print("-----------------------------------")
