@@ -1,4 +1,4 @@
-#   Revisado y actualizado el 26 de Abril de 2018 By Jotxee
+#   Revisado y actualizado el 15 de Mayo de 2018 By Jose Alberto Lorenzo
 import _thread
 import machine
 import math
@@ -7,12 +7,15 @@ import os
 import time
 import utime
 import pycom
+try:
+    from machine import RTC
+    from machine import SD
+    from machine import Timer
+    from L76GNSS import L76GNSS
+    from pytrack import Pytrack
+except:
+    print('** No hay librerias GPS **')
 
-from machine import RTC
-from machine import SD
-from machine import Timer
-from L76GNSS import L76GNSS
-from pytrack import Pytrack
 import gc
 gc.enable()
 
@@ -72,71 +75,75 @@ def resetDocument():
 def buscarMensajes(dorsal):
     alertas=[]
     while True:
-        ConfirmacionLed('buscandoalerta')
-        tiempo = time.time()
-        s.setblocking(True)
-        data = s.recv(128)
-        if existe('dorsal.txt'):
-            a = open('dorsal.txt')
-            dorsal = a.read()
-        print("Mensaje recibido:",data)
-        ide =data.decode("utf-8")  #identificacion
-        ide = ide.split('-')
-        if ide[0] == 'alerta':
-            if ide[1] not in alertas:
-                tmp = tiempo
-                alertas.append(ide[1])
-                cuenta = 0
-                for z in ide[1]:
-                    if z ==";":
-                        cuenta+=1
-                        #print("Cuenta-->",cuenta)
-                if cuenta == 1:
-                    print("Este mensaje es personalizado:",ide[1])
-                    dor = ide[1].split(';')
-                    if dor[0]==dorsal:
+        try:
+
+            ConfirmacionLed('buscandoalerta')
+            tiempo = time.time()
+            s.setblocking(True)
+            data = s.recv(128)
+            if existe('dorsal.txt'):
+                a = open('dorsal.txt')
+                dorsal = a.read()
+            print("Mensaje recibido:",data)
+            ide =data.decode("utf-8")  #identificacion
+            ide = ide.split('-')
+            if ide[0] == 'alerta':
+                if ide[1] not in alertas:
+                    tmp = tiempo
+                    alertas.append(ide[1])
+                    cuenta = 0
+                    for z in ide[1]:
+                        if z ==";":
+                            cuenta+=1
+                            #print("Cuenta-->",cuenta)
+                    if cuenta == 1:
+                        print("Este mensaje es personalizado:",ide[1])
+                        dor = ide[1].split(';')
+                        if dor[0]==dorsal:
+                            ConfirmacionLed('bluetooth')
+                            f = open ('alertapersonalizada.txt', 'a')#Modo 'a' Para a�adir no sobre escribir
+                            #print("Mensaje que se guardara = ",dor[1])
+                            f.write(dor[1]+"|")
+                            f.close()
+                    else:
+                        print("Alerta Generica",ide[0])
                         ConfirmacionLed('bluetooth')
-                        f = open ('alertapersonalizada.txt', 'a')#Modo 'a' Para a�adir no sobre escribir
-                        #print("Mensaje que se guardara = ",dor[1])
-                        f.write(dor[1]+"|")
+                        f = open ('alerta.txt', 'a')#Modo 'a' Para a�adir no sobre escribir
+                        f.write(ide[1]+"|")
                         f.close()
                 else:
-                    print("Alerta Generica",ide[0])
+                    print("Tiempo-",tiempo,"tmp",tmp,"=",tiempo-tmp)
+                    if tiempo-tmp >= 300:
+                        #Si han pasado 5 minutos Borramos array alertas y ficheros del LoPy:
+                        if existe('alerta.txt'):
+                            os.remove('alerta.txt')
+                        elif existe('alertapersonalizada.txt'):
+                            os.remove('alertapersonalizada.txt')
+                        del alertas[:]
+                        tmp = tiempo
+                print("Asi estan las alertas=",alertas)
+            elif ide[0] == 'seguidores':
+                dor = ide[1]
+                ide = ide[1].split(';')
+                print("Dorsal destino:",ide[0])
+                if ide[0]==dorsal:
+                    print("dentro del mismo dorsal: ",dor)
                     ConfirmacionLed('bluetooth')
-                    f = open ('alerta.txt', 'a')#Modo 'a' Para a�adir no sobre escribir
-                    f.write(ide[1]+"|")
+                    f = open ('seguidores.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
+                    f.write(dor)
                     f.close()
-            else:
-                print("Tiempo-",tiempo,"tmp",tmp,"=",tiempo-tmp)
-                if tiempo-tmp >= 300:
-                    #Si han pasado 5 minutos Borramos array alertas y ficheros del LoPy:
-                    if existe('alerta.txt'):
-                        os.remove('alerta.txt')
-                    elif existe('alertapersonalizada.txt'):
-                        os.remove('alertapersonalizada.txt')
-                    del alertas[:]
-                    tmp = tiempo
-            print("Asi estan las alertas=",alertas)
-        elif ide[0] == 'seguidores':
-            dor = ide[1]
-            ide = ide[1].split(';')
-            print("Dorsal destino:",ide[0])
-            if ide[0]==dorsal:
-                print("dentro del mismo dorsal: ",dor)
-                ConfirmacionLed('bluetooth')
-                f = open ('seguidores.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
-                f.write(dor)
-                f.close()
-        elif ide[0] == 'baseConfirma':
-            dor = ide[1]
-            ide = ide[1].split(';')
-            print("Dorsal destino:",ide[0])
-            if ide[0]==dorsal:
-                print("dentro del mismo dorsal: ",dor)
-                ConfirmacionLed('bluetooth')
-                f = open ('confirmacionEnlace.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
-                f.write(dor)
-                f.close()
+            elif ide[0] == 'baseConfirma':
+                dor = ide[1]
+                ide = ide[1].split(';')
+                print("Dorsal destino:",ide[0])
+                if ide[0]==dorsal:
+                    print("dentro del mismo dorsal: ",dor)
+                    ConfirmacionLed('bluetooth')
+                    f = open ('confirmacionEnlace.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
+                    f.write(dor)
+                    f.close()
+        except:
+            print('** Algo ha fallado en buscarMensajes **')
 
 def recogerPosGPSMovil():
     x = open('myposition.txt')
@@ -180,7 +187,7 @@ def enviarPos(dorsal,dorsalDefault):
         time.sleep(30) #Pausa entre toma de coordenadas.
 
 ###     Variables
-dorsal = "RPRUEBA"
+dorsal = "R2"
 dorsalDefault =  dorsal
 
 ###     Main
