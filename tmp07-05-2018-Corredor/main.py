@@ -45,7 +45,7 @@ def ConfirmacionLed(funcion):
 
 def resetDocument():
     #Lista de documentos posible: alerta.txt | dorsal.txt | myposition.txt | registro.txt | seguidores.txt
-    lista = ['alerta','dorsal','myposition','registro','seguidores']
+    lista = ['alerta','dorsal','myposition','registro','seguidores','confirmacionEnlace']
     for i in lista:
         if existe(i+'.txt'):
             print('Borrando',i+'.txt')
@@ -109,6 +109,17 @@ def buscarMensajes(dorsal):
                 f = open ('seguidores.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
                 f.write(dor)
                 f.close()
+        elif ide[0] == 'baseConfirma':
+            dor = ide[1]
+            ide = ide[1].split(';')
+            print("Dorsal destino:",ide[0])
+            if ide[0]==dorsal:
+                print("dentro del mismo dorsal: ",dor)
+                ConfirmacionLed('bluetooth')
+                f = open ('confirmacionEnlace.txt', 'w')#Modo 'a' Para a�adir no sobre escribir
+                f.write(dor)
+                f.close()
+
 def recogerPosGPSMovil():
     x = open('myposition.txt')
     x = x.read().split(';')

@@ -97,83 +97,93 @@ def inciarAlertas(lora,s):
     tmp2=tiempo
     re=0
     while True:
-        time.sleep(30)
-        tiempo=time.time()
-        if existe('alertas.txt'):
-            if re==0:
-                listalertas = enviarAlertas(s,listalertas)
-                tmp2=tiempo
-                re+=1
-            elif tiempo-tmp2>=60 and re !=0:
-                tmp2=tiempo
-                print("Reenviando la lista de alertas")
-                del listalertas[:] #Borro la lista y reenvio leyendo de nuevo.
-                listalertas = enviarAlertas(s,listalertas)
+        try:
+            time.sleep(30)
+            tiempo=time.time()
+            if existe('alertas.txt'):
+                if re==0:
+                    listalertas = enviarAlertas(s,listalertas)
+                    tmp2=tiempo
+                    re+=1
+                elif tiempo-tmp2>=60 and re !=0:
+                    tmp2=tiempo
+                    print("Reenviando la lista de alertas")
+                    del listalertas[:] #Borro la lista y reenvio leyendo de nuevo.
+                    listalertas = enviarAlertas(s,listalertas)
+                else:
+                    print("Alertas existe, pero aun no ha pasado los 60 segundos=", tiempo-tmp2)
             else:
-                print("Alertas existe, pero aun no ha pasado los 60 segundos=", tiempo-tmp2)
-        else:
-            print("- No hay alertas(Archivo 'alertas.txt' no existe.)")
-            del listalertas[:]
-            re=0
+                print("- No hay alertas(Archivo 'alertas.txt' no existe.)")
+                del listalertas[:]
+                re=0
+        except:
+            print('*** - Algo ha fallado en IniciarAlertas - ***')
 
 def iniciarSeguidores(lora,s):
     s.setblocking(False)
     tiempo = time.time()
     tmp=tiempo
     while True:
-        time.sleep(24)
-        tiempo=time.time()
-        if existe('seguidores.txt'):
-            if tiempo-tmp >= 120 :
-                tmp=tiempo
-                a = open('seguidores.txt')
-                j = a.read()
-                j = j.split('|')
-                b= len(j)
-                print("N seguidores",b)
-                for x in range(b):
-                    j[x] = j[x].replace('\n','')
-                    j[x] = j[x].replace('\r','')
-                    msg = "seguidores-"+j[x]
-                    s.send(msg)
-                    print("Mensaje enviado:",msg)
-                    ConfirmacionLed('sendalert')
+        try:
+            time.sleep(24)
+            tiempo=time.time()
+            if existe('seguidores.txt'):
+                if tiempo-tmp >= 120 :
+                    tmp=tiempo
+                    a = open('seguidores.txt')
+                    j = a.read()
+                    j = j.split('|')
+                    b= len(j)
+                    print("N seguidores",b)
+                    for x in range(b):
+                        j[x] = j[x].replace('\n','')
+                        j[x] = j[x].replace('\r','')
+                        msg = "seguidores-"+j[x]
+                        s.send(msg)
+                        print("Mensaje enviado:",msg)
+                        ConfirmacionLed('sendalert')
+                else:
+                    print("Seguidores.txt existe pero Aun no han pasado 120 segundos",tiempo-tmp)
             else:
-                print("Seguidores.txt existe pero Aun no han pasado 120 segundos",tiempo-tmp)
-        else:
-            print("- No hay Seguidores(Archivo 'seguidores.txt' no existe.)")
+                print("- No hay Seguidores(Archivo 'seguidores.txt' no existe.)")
+        except:
+            print('*** - Algo ha fallado en IniciarSeguidores - ***')
 
 def iniciarCorredores(lora,s):
     corredores=[]
     while True:
-        actualizado = 0
-        s.setblocking(True)
-        data = s.recv(64) #socket.recv (bufsize [, flags])  Reciba datos del socket. El valor de retorno es una cadena que representa los datos recibidos. La cantidad máxima de datos que se recibirán a la vez se especifica mediante bufsize
-        j =data.decode("utf-8")
-        j = j.split('-')
-        if j[0] == 'witeklab':
-            print('mensaje entrante->',data)
-            for c in range(len(corredores)):
-                if j[2] in corredores[c]:
-                    corredores[c]=([j[2],j[3],j[4],j[5]])
+        try:
+            actualizado = 0
+            s.setblocking(True)
+            data = s.recv(64) #socket.recv (bufsize [, flags])  Reciba datos del socket. El valor de retorno es una cadena que representa los datos recibidos. La cantidad máxima de datos que se recibirán a la vez se especifica mediante bufsize
+            j =data.decode("utf-8")
+            j = j.split('-')
+            if j[0] == 'witeklab':
+                print('mensaje entrante->',data)
+                for c in range(len(corredores)):
+                    if j[2] in corredores[c]:
+                        corredores[c]=([j[2],j[3],j[4],j[5]])
+                        ConfirmacionLed('recibido')
+                        actualizado=1
+                        break
+                if actualizado==0:
+                    corredores.append([j[2],j[3],j[4],j[5]])
+                    msj = "baseConfirma-"+
                     ConfirmacionLed('recibido')
-                    actualizado=1
-                    break
-            if actualizado==0:
-                corredores.append([j[2],j[3],j[4],j[5]])
-                ConfirmacionLed('recibido')
 
-        print("Corredores:",len(corredores))
-        print(corredores)
+            print("Corredores:",len(corredores))
+            print(corredores)
 
-        #linea = j[2]+";"+j[1]+";"+j[3]";"+j[4]+"|" #ID;NºRegistro;Latitud;Longitud|
-        f = open ('registro.txt', 'w')#Modo 'a' Para añadir no sobre escribir
-        for c in range(len(corredores)):
-            if len(corredores)!=0:
-                d = corredores[c]
-                texto = d[1]+";"+d[2]+";"+d[3]+"|"
-                f.write(texto)
-        f.close()
+            #linea = j[2]+";"+j[1]+";"+j[3]";"+j[4]+"|" #ID;NºRegistro;Latitud;Longitud|
+            f = open ('registro.txt', 'w')#Modo 'a' Para añadir no sobre escribir
+            for c in range(len(corredores)):
+                if len(corredores)!=0:
+                    d = corredores[c]
+                    texto = d[1]+";"+d[2]+";"+d[3]+"|"
+                    f.write(texto)
+            f.close()
+        except:
+            print('*** - Algo ha fallado en IniciarCorredores - ***')
 
 ###     Variables
 pssid = "Gateway1"
