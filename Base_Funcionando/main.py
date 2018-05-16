@@ -46,12 +46,6 @@ def pulsaciones(color):
         time.sleep(0.1)
         pycom.heartbeat(False)
         time.sleep(0.2)
-#    pycom.rgbled(0x0007F)#azul               wifion
-#    pycom.rgbled(0xC011EB)#Lila             enviando alerta
-#    pycom.rgbled(0xfffe02)#Amarillo          gps ok
-#    pycom.rgbled(0x7f0000)#Rojo suave       gps off
-#    pycom.rgbled(0x7f700)#verde             encendido
-#    pycom.rgbled(0xfb0c86) #rosa
 
 def ConfirmacionLed(funcion):
     funciones={'wifi':0x0007F,'recibido':0xfffe02,'nogps':0x7f0000,'encendido':0x7f700,'sendalert':0xC011EB}# wifi(azul) | recibido(Amarillo) | nogps(rojo) | encendido(verde) | sendalert(lila) -gpsok()
@@ -119,16 +113,16 @@ def inciarAlertas(lora,s):
         except:
             print('*** - Algo ha fallado en IniciarAlertas - ***')
 
-def iniciarSeguidores(lora,s):
+def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
     s.setblocking(False)
     tiempo = time.time()
     tmp=tiempo
     while True:
         try:
-            time.sleep(24)
+            time.sleep(12)
             tiempo=time.time()
             if existe('seguidores.txt'):
-                if tiempo-tmp >= 120 :
+                if tiempo-tmp >= tiempoEnvioSeguidores:
                     tmp=tiempo
                     a = open('seguidores.txt')
                     j = a.read()
@@ -143,7 +137,7 @@ def iniciarSeguidores(lora,s):
                         print("Mensaje enviado:",msg)
                         ConfirmacionLed('sendalert')
                 else:
-                    print("Seguidores.txt existe pero Aun no han pasado 120 segundos",tiempo-tmp)
+                    print("Seguidores.txt existe pero Aun no han pasado X segundos",tiempo-tmp)
             else:
                 print("- No hay Seguidores(Archivo 'seguidores.txt' no existe.)")
         except:
@@ -188,6 +182,7 @@ def iniciarCorredores(lora,s):
 
 ###     Variables
 pssid = "Gateway1"
+tiempoEnvioSeguidores = 20
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 ###     Main
@@ -199,4 +194,4 @@ a = _thread.start_new_thread(iniciarCorredores,(lora,s,))
 print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
 b = _thread.start_new_thread(inciarAlertas,(lora,s,))
 print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
-c = _thread.start_new_thread(iniciarSeguidores,(lora,s))
+c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))

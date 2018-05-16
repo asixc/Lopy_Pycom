@@ -1,0 +1,6 @@
+#    pycom.rgbled(0x0007F)#azul               wifion
+#    pycom.rgbled(0xC011EB)#Lila             enviando alerta
+#    pycom.rgbled(0xfffe02)#Amarillo          gps ok
+#    pycom.rgbled(0x7f0000)#Rojo suave       gps off
+#    pycom.rgbled(0x7f700)#verde             encendido
+#    pycom.rgbled(0xfb0c86) #rosa

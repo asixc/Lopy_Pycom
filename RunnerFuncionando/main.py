@@ -187,7 +187,7 @@ def enviarPos(dorsal,dorsalDefault):
         time.sleep(30) #Pausa entre toma de coordenadas.
 
 ###     Variables
-dorsal = "R2"
+dorsal = "4"
 dorsalDefault =  dorsal
 
 ###     Main
