@@ -1,5 +1,4 @@
 # boot.py -- run on boot-up
-# boot.py -- run on boot-up
 from network import LoRa
 import socket
 import machine
