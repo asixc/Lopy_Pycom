@@ -167,6 +167,7 @@ def enviarPos(dorsal,dorsalDefault):
         try:
             if existe('myposition.txt'):
                 coord = recogerPosGPSMovil()
+                print('Debugando coord->',coord)
             else:
                 coord = buscarPos()
                 print('Coordenadas recibidas->',coord)
@@ -178,19 +179,19 @@ def enviarPos(dorsal,dorsalDefault):
                 dorsal = a.read()
                 print("Dorsal:",dorsal)
             x = "witeklab-"+str(j)+"-"+str(dorsalDefault)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])
-            #x = "witeklab-"+str(j)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])  Antiguo!
-
+            ConfirmacionLed('gpsok')
             time.sleep(5)
             s.send(x)
-            ConfirmacionLed('gpsok')
             print("Coordenadas enviadas:",x)
             j+=1
-            time.sleep(30) #Pausa entre toma de coordenadas.
+
         except Exception as e:
             print("Algo ha fallado en EnviarPos:",str(e))
+            time.sleep(30) #Pausa entre toma de coordenadas.
+
 
 ###     Variables
-dorsal = "1"
+dorsal = "8"
 dorsalDefault =  dorsal
 
 ###     Main
