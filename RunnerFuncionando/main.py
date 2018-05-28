@@ -147,7 +147,9 @@ def buscarMensajes(dorsal):
 
 def recogerPosGPSMovil():
     x = open('myposition.txt')
-    x = x.read().split(';')
+    test = x.read()
+    print('# DEBUG: myposition.txt->',test)
+    x = test.split(';')
     lat_d = x[0]
     lon_d = x[1]
     return(lat_d, lon_d)
@@ -167,7 +169,6 @@ def enviarPos(dorsal,dorsalDefault):
         try:
             if existe('myposition.txt'):
                 coord = recogerPosGPSMovil()
-                print('Debugando coord->',coord)
             else:
                 coord = buscarPos()
                 print('Coordenadas recibidas->',coord)
@@ -184,12 +185,11 @@ def enviarPos(dorsal,dorsalDefault):
             s.send(x)
             print("Coordenadas enviadas:",x)
             j+=1
+            time.sleep(10) #Pausa entre toma de coordenadas.
 
         except Exception as e:
             print("Algo ha fallado en EnviarPos:",str(e))
-        
-		time.sleep(30) #Pausa entre toma de coordenadas.
-
+            time.sleep(10) #Pausa entre toma de coordenadas.
 
 ###     Variables
 dorsal = "6"
