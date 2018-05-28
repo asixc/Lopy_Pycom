@@ -164,27 +164,30 @@ def buscarPos():
 def enviarPos(dorsal,dorsalDefault):
     j=0
     while True:
-        if existe('myposition.txt'):
-            coord = recogerPosGPSMovil()
-        else:
-            coord = buscarPos()
-            print('Coordenadas recibidas->',coord)
-            p = str(coord[0])
-            if p =='None':
-                coord = (0,0)
-        if existe('dorsal.txt'):
-            a = open('dorsal.txt')
-            dorsal = a.read()
-            print("Dorsal:",dorsal)
-        x = "witeklab-"+str(j)+"-"+str(dorsalDefault)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])
-        #x = "witeklab-"+str(j)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])  Antiguo!
+        try:
+            if existe('myposition.txt'):
+                coord = recogerPosGPSMovil()
+            else:
+                coord = buscarPos()
+                print('Coordenadas recibidas->',coord)
+                p = str(coord[0])
+                if p =='None':
+                    coord = (0,0)
+            if existe('dorsal.txt'):
+                a = open('dorsal.txt')
+                dorsal = a.read()
+                print("Dorsal:",dorsal)
+            x = "witeklab-"+str(j)+"-"+str(dorsalDefault)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])
+            #x = "witeklab-"+str(j)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])  Antiguo!
 
-        time.sleep(5)
-        s.send(x)
-        ConfirmacionLed('gpsok')
-        print("Coordenadas enviadas:",x)
-        j+=1
-        time.sleep(30) #Pausa entre toma de coordenadas.
+            time.sleep(5)
+            s.send(x)
+            ConfirmacionLed('gpsok')
+            print("Coordenadas enviadas:",x)
+            j+=1
+            time.sleep(30) #Pausa entre toma de coordenadas.
+        except Exception as e:
+            print("Algo ha fallado en EnviarPos:",e)
 
 ###     Variables
 dorsal = "1"
