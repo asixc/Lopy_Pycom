@@ -187,11 +187,12 @@ def enviarPos(dorsal,dorsalDefault):
 
         except Exception as e:
             print("Algo ha fallado en EnviarPos:",str(e))
-            time.sleep(30) #Pausa entre toma de coordenadas.
+        
+		time.sleep(30) #Pausa entre toma de coordenadas.
 
 
 ###     Variables
-dorsal = "8"
+dorsal = "6"
 dorsalDefault =  dorsal
 
 ###     Main
