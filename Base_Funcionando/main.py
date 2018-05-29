@@ -111,7 +111,7 @@ def inciarAlertas(lora,s):
                 del listalertas[:]
                 re=0
         except:
-            print('*** - Algo ha fallado en IniciarAlertas - ***')
+            print("*** - Algo ha fallado en IniciarAlertas - ***")
 
 def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
     s.setblocking(False)
@@ -130,7 +130,6 @@ def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
                     j = j.replace('\n','')
                     j = j.strip("|")
                     j = j.split("|")
-                    print("DEBUG= Alertas.txt with strip->",j)
                     b= len(j)
                     print("N seguidores",b)
                     for x in range(b):
@@ -182,7 +181,7 @@ def iniciarCorredores(lora,s):
                     f.write(texto)
             f.close()
         except:
-            print('*** - Algo ha fallado en IniciarCorredores - ***')
+            print("*** - Algo ha fallado en IniciarCorredores - ***")
 
 ###     Variables
 pssid = "Gateway1"

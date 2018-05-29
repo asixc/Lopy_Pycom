@@ -8,6 +8,11 @@ def luces(color):
         time.sleep(0.1)
 
 def main():
-    luces(0xC011EB)
-
-main()
+    while True:
+        print("hora:",hora)
+        pycom.heartbeat(False)
+        luces(0xC011EB)
+        time.sleep(15)
+#Crear crhono 
+hora = time.time()
+main(hora)
