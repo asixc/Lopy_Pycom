@@ -54,8 +54,9 @@ def ConfirmacionLed(funcion):
 def enviarAlertas(s,listalertas=[]):
     a = open('alertas.txt')
     j = a.read()
-    j = j.strip('|')
-    j = j.split('|')
+    j = j.strip("|")
+    print("DEBUG= Alertas.txt with strip->",j)
+    j = j.split("|")
     b= len(j)
     print("N alertas=",b)
     for x in range(b):
