@@ -55,7 +55,6 @@ def enviarAlertas(s,listalertas=[]):
     a = open('alertas.txt')
     j = a.read()
     j = j.strip("|")
-    print("DEBUG= Alertas.txt with strip->",j)
     j = j.split("|")
     b= len(j)
     print("N alertas=",b)
@@ -127,12 +126,16 @@ def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
                     tmp=tiempo
                     a = open('seguidores.txt')
                     j = a.read()
-                    j = j.split('|')
+                    j = j.replace('\r','')
+                    j = j.replace('\n','')
+                    j = j.strip("|")
+                    j = j.split("|")
+                    print("DEBUG= Alertas.txt with strip->",j)
                     b= len(j)
                     print("N seguidores",b)
                     for x in range(b):
-                        j[x] = j[x].replace('\n','')
-                        j[x] = j[x].replace('\r','')
+                        #j[x] = j[x].replace('\n','')
+                        #j[x] = j[x].replace('\r','')
                         msg = "seguidores-"+j[x]
                         s.send(msg)
                         print("Mensaje enviado:",msg)
