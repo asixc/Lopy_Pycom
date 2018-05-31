@@ -1,11 +1,13 @@
 #Generado el 10-09-2018
 from network import LoRa
+from machine import Timer
 import socket
 import machine
 import time
 import os
 import pycom
 import _thread
+import gc
 
 ###     Funciones
 def existe(arg):
@@ -133,8 +135,6 @@ def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
                     b= len(j)
                     print("N seguidores",b)
                     for x in range(b):
-                        #j[x] = j[x].replace('\n','')
-                        #j[x] = j[x].replace('\r','')
                         msg = "seguidores-"+j[x]
                         s.send(msg)
                         print("Mensaje enviado:",msg)
@@ -146,7 +146,7 @@ def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
         except:
             print('*** - Algo ha fallado en IniciarSeguidores - ***')
 
-def iniciarCorredores(lora,s):
+def iniciarCorredores(lora,s,tiempoVaciarBasura):
     corredores=[]
     while True:
         try:
@@ -156,21 +156,30 @@ def iniciarCorredores(lora,s):
             j =data.decode("utf-8")
             j = j.split('-')
             if j[0] == 'witeklab':
+                #j[dorsalDefault],j[dorsalactual],j[contador],j[latitud],j[Longitud]
                 print('mensaje entrante->',data)
                 for c in range(len(corredores)):
                     if j[2] in corredores[c]:
-                        corredores[c]=([j[2],j[3],j[4],j[5]])
-                        ConfirmacionLed('recibido')
-                        actualizado=1
-                        break
+                        if j[1] > corredores[c][2]:
+                            corredores[c]=([j[2],j[3],j[1],j[4],j[5]])
+                            ConfirmacionLed('recibido')
+                            actualizado=1
+                            break
                 if actualizado==0:
-                    corredores.append([j[2],j[3],j[4],j[5]])
+                    corredores.append([j[2],j[3],j[1],j[4],j[5]])
                     msj = "baseConfirma-"+j[2]+";OK"
                     s.send(msj)
                     ConfirmacionLed('recibido')
 
             print("Corredores:",len(corredores))
             print(corredores)
+            print(gc.mem_free())
+            print(gc.isenabled())
+            print("crono->",crono.read())
+            if crono.read() > tiempoVaciarBasura :
+                gc.collect()
+                crono.reset()
+                print("Vaciando papelera...Memoria disponible:",gc.mem_free())
 
             #linea = j[2]+";"+j[1]+";"+j[3]";"+j[4]+"|" #ID;NºRegistro;Latitud;Longitud|
             f = open ('registro.txt', 'w')#Modo 'a' Para añadir no sobre escribir
@@ -186,15 +195,18 @@ def iniciarCorredores(lora,s):
 ###     Variables
 pssid = "Gateway1"
 tiempoEnvioSeguidores = 20
+tiempoVaciarBasura = 100
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
+crono = Timer.Chrono()
+crono.start()
 ###     Main
 pycom.heartbeat(False)
 resetDocument()
 iniciarWifi(pssid)
 print('1-> Iniciamos primer hilo el registro de corredores:')
-a = _thread.start_new_thread(iniciarCorredores,(lora,s,))
+a = _thread.start_new_thread(iniciarCorredores,(lora,s,tiempoVaciarBasura,))
 print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
-b = _thread.start_new_thread(inciarAlertas,(lora,s,))
+#b = _thread.start_new_thread(inciarAlertas,(lora,s,))
 print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
-c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))
+#c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))

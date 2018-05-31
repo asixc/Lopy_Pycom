@@ -1,4 +1,4 @@
-#   Revisado y actualizado el 15 de Mayo de 2018 By Jose Alberto Lorenzo
+#   Revisado y actualizado el 31 de Mayo de 2018 By Jose Alberto Lorenzo
 import _thread
 import machine
 import math
@@ -8,6 +8,7 @@ import time
 import utime
 import pycom
 try:
+    from machine import Timer
     from machine import RTC
     from machine import SD
     from machine import Timer
@@ -23,6 +24,8 @@ gc.enable()
 # setup LoRa:
 from network import LoRa
 import socket
+#Formato definir Lora con más parámetros:
+#lora = LoRa(mode=LoRa.LORA, frequency=868000000, tx_power=14, bandwidth=LoRa.BW_125KHZ, sf=7)
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
 
@@ -76,7 +79,6 @@ def buscarMensajes(dorsal):
     alertas=[]
     while True:
         try:
-
             ConfirmacionLed('buscandoalerta')
             tiempo = time.time()
             s.setblocking(True)
@@ -148,7 +150,7 @@ def buscarMensajes(dorsal):
 def recogerPosGPSMovil():
     x = open('myposition.txt')
     test = x.read()
-    print('# DEBUG: myposition.txt->',test)
+    #print('# DEBUG: myposition.txt->',test)
     x = test.split(';')
     lat_d = x[0]
     lon_d = x[1]
@@ -167,6 +169,7 @@ def enviarPos(dorsal,dorsalDefault):
     j=0
     while True:
         try:
+            print("Prueba de leer el crono: ",crono.read())
             if existe('myposition.txt'):
                 coord = recogerPosGPSMovil()
             else:
@@ -181,26 +184,29 @@ def enviarPos(dorsal,dorsalDefault):
                 print("Dorsal:",dorsal)
             x = "witeklab-"+str(j)+"-"+str(dorsalDefault)+"-"+str(dorsal)+"-"+str(coord[0]) + "-"+str(coord[1])
             ConfirmacionLed('gpsok')
-            time.sleep(5)
             s.send(x)
             print("Coordenadas enviadas:",x)
             j+=1
-            time.sleep(10) #Pausa entre toma de coordenadas.
+            time.sleep(tiempoEntreCoordenadas) #Pausa entre toma de coordenadas.
 
         except Exception as e:
             print("Algo ha fallado en EnviarPos:",str(e))
-            time.sleep(10) #Pausa entre toma de coordenadas.
+            time.sleep(tiempoEntreCoordenadas) #Pausa entre toma de coordenadas.
+def main():
+    crono.start()
+    pycom.heartbeat(False)
+    resetDocument()
+    iniciarWifi(dorsal)
+    print('1-> Iniciamos primer hilo Con la busqueda de mensajes:')
+    _thread.start_new_thread(buscarMensajes, (dorsal,))
+    print('2-> Iniciamos la busqueda de GPS (Fichero o localización)')
+    _thread.start_new_thread(enviarPos,(dorsal,dorsalDefault,))
+    print("-----------------------------------")
 
 ###     Variables
-dorsal = "1"
+dorsal = "6"
 dorsalDefault =  dorsal
-
+crono = Timer.Chrono()
+tiempoEntreCoordenadas = 21
 ###     Main
-pycom.heartbeat(False)
-resetDocument()
-iniciarWifi(dorsal)
-print('1-> Iniciamos primer hilo Con la busqueda de mensajes:')
-_thread.start_new_thread(buscarMensajes, (dorsal,))
-print('2-> Iniciamos la busqueda de GPS (Fichero o localización)')
-_thread.start_new_thread(enviarPos,(dorsal,dorsalDefault,))
-print("-----------------------------------")
+main()
