@@ -1,3 +1,2 @@
 # Tareas pendientes:
 - Habilitar la comunicación / programación entre dos bases.
-- Cambiar el tiempo de envío de posición, para que cada corredor sea diferente
