@@ -25,7 +25,7 @@ while True:
         cl.setblocking(True)
         print("Client connection from:", remote_addr)
 
-        file = "/flash/test.txt"
+        file = "/flash/registro.txt"
         print("Sending: ", file)
 
         with open(file, 'rb') as f:
