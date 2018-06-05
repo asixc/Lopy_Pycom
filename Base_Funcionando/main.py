@@ -192,6 +192,14 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
         except:
             print("*** - Algo ha fallado en IniciarCorredores - ***")
 
+def escucharBaseRepetidora():
+    while True:
+        try:
+            print("mmm")
+            time.sleep(10)
+        except:
+            print("*** - Algo ha fallado en escucharBaseRepetidora - ***")
+            
 ###     Variables
 pssid = "Gateway1"
 tiempoEnvioSeguidores = 20
@@ -207,6 +215,9 @@ iniciarWifi(pssid)
 print('1-> Iniciamos primer hilo el registro de corredores:')
 a = _thread.start_new_thread(iniciarCorredores,(lora,s,tiempoVaciarBasura,))
 print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
-#b = _thread.start_new_thread(inciarAlertas,(lora,s,))
+b = _thread.start_new_thread(inciarAlertas,(lora,s,))
 print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
-#c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))
+c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))
+#Pendiente implantacion:
+print('4-> Iniciamos el cuarto hilo con la espera de recibir el registro de la base repetidora')
+_thread.start_new_thread(escucharBaseRepetidora,())

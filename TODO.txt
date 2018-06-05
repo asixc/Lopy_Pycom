@@ -1,2 +1,5 @@
 # Tareas pendientes:
 - Habilitar la comunicación / programación entre dos bases.
+- Pendiente hacer en Base_funcionando :
+    -Cuando recibe un fichero de registro de una base repetidora forzar la comparación
+    de los corredores del fichero con los corredores que tenga el array actualmente.

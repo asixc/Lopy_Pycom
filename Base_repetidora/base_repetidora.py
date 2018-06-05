@@ -1,6 +1,7 @@
-#Generado el 31-05-2018 Sin modicar aún... falta añadir la funcion de comunicación.
+#Generado el 05-06-2018
 from network import LoRa
 from machine import Timer
+from network import WLAN
 import socket
 import machine
 import time
@@ -8,28 +9,13 @@ import os
 import pycom
 import _thread
 import gc
+import select
 
 ###     Funciones
 def existe(arg):
     try:
         fichero = open(arg)
         fichero.close()
-        return True
-    except:
-        return False
-
-def iniciarWifi(pssid):
-    try:
-        import network
-        from network import WLAN
-        wlan = network.WLAN(mode=network.WLAN.STA)
-        wlan.init(mode=WLAN.AP, ssid=pssid, auth=(WLAN.WPA2,'witeklab@2018'), channel=7, antenna=WLAN.INT_ANT)
-        from network import Server
-        server = Server(login=('micro', 'python'), timeout=600)
-        server.timeout(300)
-        server.timeout()
-        server.isrunning()
-        ConfirmacionLed('wifi')
         return True
     except:
         return False
@@ -192,8 +178,51 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
         except:
             print("*** - Algo ha fallado en IniciarCorredores - ***")
 
+def enviarAbaseRegistro():
+    try:
+        if existe('seguidores.txt'):
+            wlan = WLAN(mode=WLAN.STA)
+            nets = wlan.scan()
+            for net in nets:
+                if net.ssid == 'Gateway1':
+                    print('Network found!')
+                    wlan.connect(net.ssid, auth=(net.sec, 'password'), timeout=5000)
+                    while not wlan.isconnected():
+                        machine.idle() # save power while waiting
+                    print('WLAN connection succeeded!')
+                    break
+            else:
+                raise Exception("WiFi network not found")
+
+            # sleep just to make sure the wifi is connected
+            time.sleep(1)
+
+            ip, subnet, gateway, dns = wlan.ifconfig()
+            print("wlan->",wlan.ifconfig())
+            # Connect to server
+            port = 12345
+            s = socket.socket()
+            print("Connecting to: ", gateway, port)
+            s.connect((gateway, port))
+            s.setblocking(True)
+            s.settimeout(2)
+
+            file = "/flash/registro.txt"
+            with open(file, 'rb') as f:
+                data = f.read(1024)
+                while(data):
+                    print("sending", data)
+                    s.sendall(data)
+                    data = f.read(1024)
+            print("Done Sending")
+            wlan.disconnect()
+            s.close()
+            time.sleep(10)
+    except Exception as e:
+        print("Algo ha fallado en enviarAbaseRegistro:",str(e))
+
 ###     Variables
-pssid = "Gateway2"
+pssid = "Gateway1"
 tiempoEnvioSeguidores = 20
 tiempoVaciarBasura = 100
 lora = LoRa(mode=LoRa.LORA)
@@ -203,10 +232,9 @@ crono.start()
 ###     Main
 pycom.heartbeat(False)
 resetDocument()
-iniciarWifi(pssid)
 print('1-> Iniciamos primer hilo el registro de corredores:')
 a = _thread.start_new_thread(iniciarCorredores,(lora,s,tiempoVaciarBasura,))
-print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
-b = _thread.start_new_thread(inciarAlertas,(lora,s,))
-print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
-c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))
+#print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
+#b = _thread.start_new_thread(inciarAlertas,(lora,s,))
+#print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
+#c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))

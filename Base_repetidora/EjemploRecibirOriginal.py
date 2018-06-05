@@ -22,10 +22,11 @@ else:
 time.sleep(1)
 
 ip, subnet, gateway, dns = wlan.ifconfig()
-
+print("wlan->",wlan.ifconfig())
 # Connect to server
 port = 12345
 s = socket.socket()
+print("g->",gateway)
 print("Connecting to: ", gateway, port)
 s.connect((gateway, port))
 s.setblocking(True)
@@ -40,3 +41,5 @@ with open(file, 'wb') as f:
             f.write(data)
         except TimeoutError:
             break
+wlan.disconnect()
+s.close()
