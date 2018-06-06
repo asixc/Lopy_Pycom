@@ -186,7 +186,7 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
             for c in range(len(corredores)):
                 if len(corredores)!=0:
                     d = corredores[c]
-                    texto = d[1]+";"+d[2]+";"+d[3]+"|"
+                    texto = d[1] + ";" + d[2] + ";" + d[3] + ";" + d[4] + "|"
                     f.write(texto)
             f.close()
         except:
@@ -199,7 +199,7 @@ def escucharBaseRepetidora():
             time.sleep(10)
         except:
             print("*** - Algo ha fallado en escucharBaseRepetidora - ***")
-            
+
 ###     Variables
 pssid = "Gateway1"
 tiempoEnvioSeguidores = 20

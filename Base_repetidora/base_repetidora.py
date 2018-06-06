@@ -172,58 +172,62 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
             for c in range(len(corredores)):
                 if len(corredores)!=0:
                     d = corredores[c]
-                    texto = d[1]+";"+d[2]+";"+d[3]+"|"
+                    print("# DEBUG: Corredor escrito-> ",d)
+                    texto = d[1] + ";" + d[2] + ";" + d[3] + ";" + d[4] + "|"
                     f.write(texto)
             f.close()
         except:
             print("*** - Algo ha fallado en IniciarCorredores - ***")
 
 def enviarAbaseRegistro():
-    try:
-        if existe('seguidores.txt'):
-            wlan = WLAN(mode=WLAN.STA)
-            nets = wlan.scan()
-            for net in nets:
-                if net.ssid == 'Gateway1':
-                    print('Network found!')
-                    wlan.connect(net.ssid, auth=(net.sec, 'password'), timeout=5000)
-                    while not wlan.isconnected():
-                        machine.idle() # save power while waiting
-                    print('WLAN connection succeeded!')
-                    break
-            else:
-                raise Exception("WiFi network not found")
+    x=0
+    while True:
+        time.sleep(30)
+        try:
+            if existe('registro.txt'):
+                wlan = WLAN(mode=WLAN.STA)
+                nets = wlan.scan()
+                for net in nets:
+                    if net.ssid == 'Gateway1':
+                        print('Network found!')
+                        wlan.connect(net.ssid, auth=(net.sec, 'password'), timeout=5000)
+                        while not wlan.isconnected():
+                            machine.idle() # save power while waiting
+                        print('WLAN connection succeeded!')
+                        break
+                else:
+                    raise Exception("WiFi network not found")
 
-            # sleep just to make sure the wifi is connected
-            time.sleep(1)
+                # sleep just to make sure the wifi is connected
+                time.sleep(1)
 
-            ip, subnet, gateway, dns = wlan.ifconfig()
-            print("wlan->",wlan.ifconfig())
-            # Connect to server
-            port = 12345
-            s = socket.socket()
-            print("Connecting to: ", gateway, port)
-            s.connect((gateway, port))
-            s.setblocking(True)
-            s.settimeout(2)
+                ip, subnet, gateway, dns = wlan.ifconfig()
+                print("wlan->",wlan.ifconfig())
+                # Connect to server
+                port = 12345
+                s = socket.socket()
+                print("Connecting to: ", gateway, port)
+                s.connect((gateway, port))
+                s.setblocking(True)
+                s.settimeout(2)
 
-            file = "/flash/registro.txt"
-            with open(file, 'rb') as f:
-                data = f.read(1024)
-                while(data):
-                    print("sending", data)
-                    s.sendall(data)
+                file = "/flash/registro.txt"
+                with open(file, 'rb') as f:
                     data = f.read(1024)
-            print("Done Sending")
-            wlan.disconnect()
-            s.close()
-            time.sleep(10)
-    except Exception as e:
-        print("Algo ha fallado en enviarAbaseRegistro:",str(e))
+                    while(data):
+                        print("sending", data)
+                        s.sendall(data)
+                        data = f.read(1024)
+                print("Done Sending")
+                wlan.disconnect()
+                s.close()
+            x=x+1
+            print("Vuelta:",x)
+        except Exception as e:
+            print("Algo ha fallado en enviarAbaseRegistro:", str(e))
+
 
 ###     Variables
-pssid = "Gateway1"
-tiempoEnvioSeguidores = 20
 tiempoVaciarBasura = 100
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
@@ -236,5 +240,5 @@ print('1-> Iniciamos primer hilo el registro de corredores:')
 a = _thread.start_new_thread(iniciarCorredores,(lora,s,tiempoVaciarBasura,))
 #print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
 #b = _thread.start_new_thread(inciarAlertas,(lora,s,))
-#print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
-#c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))
+print('2-> Iniciamos el hilo con la repeticion de registro.txt')
+c = _thread.start_new_thread(enviarAbaseRegistro,())
