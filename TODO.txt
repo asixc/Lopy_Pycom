@@ -3,3 +3,7 @@
 - Pendiente hacer en Base_funcionando :
     -Cuando recibe un fichero de registro de una base repetidora forzar la comparación
     de los corredores del fichero con los corredores que tenga el array actualmente.
+
+-Problema encontrado que cuando el contador de runner pasa de 100 lo guarda como un corredor diferente.
+-El receptor al cabo de unas cuantas conexiones peta: OSError: 23
+- Al reiniciar habría que mirar como cerrar las antiguas conexiones o lo que sea para que no sale el error: OSError: [Errno 12] ENOMEM
