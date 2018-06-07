@@ -1,4 +1,4 @@
-#   Revisado y actualizado el 31 de Mayo de 2018 By Jose Alberto Lorenzo
+#   Revisado y actualizado el 07 de Junio de 2018 By Jose Alberto Lorenzo
 import _thread
 import machine
 import math
