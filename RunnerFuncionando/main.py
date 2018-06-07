@@ -214,7 +214,7 @@ def main():
 #lora = LoRa(mode=LoRa.LORA, frequency=868000000, tx_power=14, bandwidth=LoRa.BW_125KHZ, sf=7)
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
-dorsal = "2"
+dorsal = "1"
 dorsalDefault = dorsal
 crono = Timer.Chrono()
 tiempoEntreCoordenadas = numAleatorio()
