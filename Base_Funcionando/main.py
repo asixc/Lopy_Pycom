@@ -163,10 +163,10 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
                 print('mensaje entrante->',data)
                 for c in range(len(corredores)):
                     if j[2] in corredores[c]:
+                        actualizado=1
                         if int(j[1]) > int(corredores[c][2]):
                             corredores[c]=([j[2],j[3],j[1],j[4],j[5]])
                             ConfirmacionLed('recibido')
-                            actualizado=1
                             break
                 if actualizado==0:
                     corredores.append([j[2],j[3],j[1],j[4],j[5]])
