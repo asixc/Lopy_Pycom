@@ -196,11 +196,42 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
             print("*** - Algo ha fallado en IniciarCorredores - *** -> ",e)
 
 def escucharBaseRepetidora():
+    port = 12345
     print('4-> Iniciamos el cuarto hilo con la espera de recibir el registro de la base repetidora')
     while True:
         try:
-            print("Escuchar Base Repetidora en proceso de programar...")
-            return False
+
+            while True:
+                s = socket.socket()
+                s.bind(socket.getaddrinfo("0.0.0.0", port)[0][4])
+                s.listen(2s)
+                print("Mostramos listado:",os.listdir())
+                if existe('registro2.txt'):
+                    print("Mostramos contenido fichero registro2.txt:")
+                    print(open('registro2.txt').read())
+                    pass
+
+                print("\n\nEsperando conexion")
+                readable, writable, errored = select.select([s], [], [])
+                for s in readable:
+                    cl, remote_addr = s.accept()
+                    cl.setblocking(True)
+                    cl.settimeout(2)
+                    print("Client connection from:", remote_addr)
+                    file = "/flash/registro2.txt"
+                    print("writing: ", file)
+
+                    with open(file, 'wb') as f:
+                        while True:
+                            try:
+                                data = cl.recv(1024)
+                                print(data)
+                                f.write(data)
+                                f.close()
+                            except TimeoutError:
+                                break
+                print("Recibido...Faltaría actualizar corredores")
+                s.close()
         except:
             print("*** - Algo ha fallado en escucharBaseRepetidora - ***")
 
