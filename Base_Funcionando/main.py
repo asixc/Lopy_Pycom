@@ -116,25 +116,25 @@ def inciarAlertas(lora,s):
         except:
             print("*** - Algo ha fallado en IniciarAlertas - ***")
 
-def iniciarSeguidores(lora,s,tiempoEnvioSeguidores):
+def iniciarSeguidores(lora,s,tiempoEntreEnvioSeguidores,tiempoBusquedaSeguidores):
     s.setblocking(False)
     tiempo = time.time()
-    tmp=tiempo
+    tmp = tiempo
     print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
     while True:
         try:
-            time.sleep(12)
-            tiempo=time.time()
+            time.sleep(tiempoBusquedaSeguidores)
+            tiempo = time.time()
             if existe('seguidores.txt'):
-                if tiempo-tmp >= tiempoEnvioSeguidores:
-                    tmp=tiempo
+                if tiempo - tmp >= tiempoEntreEnvioSeguidores:
+                    tmp = tiempo
                     a = open('seguidores.txt')
                     j = a.read()
                     j = j.replace('\r','')
                     j = j.replace('\n','')
                     j = j.strip("|")
                     j = j.split("|")
-                    b= len(j)
+                    b = len(j)
                     print("N seguidores",b)
                     for x in range(b):
                         msg = "seguidores-"+j[x]
@@ -156,14 +156,14 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
             actualizado = 0
             s.setblocking(True)
             data = s.recv(64) #socket.recv (bufsize [, flags])  Reciba datos del socket. El valor de retorno es una cadena que representa los datos recibidos. La cantidad máxima de datos que se recibirán a la vez se especifica mediante bufsize
-            j =data.decode("utf-8")
+            j = data.decode("utf-8")
             j = j.split('-')
             if j[0] == 'witeklab':
                 #j[dorsalDefault],j[dorsalactual],j[contador],j[latitud],j[Longitud]
                 print('mensaje entrante->',data)
                 for c in range(len(corredores)):
                     if j[2] in corredores[c]:
-                        actualizado=1
+                        actualizado = 1
                         if int(j[1]) > int(corredores[c][2]):
                             corredores[c]=([j[2],j[3],j[1],j[4],j[5]])
                             ConfirmacionLed('recibido')
@@ -187,7 +187,7 @@ def iniciarCorredores(lora,s,tiempoVaciarBasura):
             #linea = j[2]+";"+j[1]+";"+j[3]";"+j[4]+"|" #ID;NºRegistro;Latitud;Longitud|
             f = open ('registro.txt', 'w')#Modo 'a' Para añadir no sobre escribir
             for c in range(len(corredores)):
-                if len(corredores)!=0:
+                if len(corredores)!= 0:
                     d = corredores[c]
                     texto = d[1]+";"+d[3]+";"+d[4]+"|"
                     f.write(texto)
@@ -207,7 +207,8 @@ def escucharBaseRepetidora():
 
 ###     Variables
 pssid = "Gateway1"
-tiempoEnvioSeguidores = 20
+tiempoEntreEnvioSeguidores = 110
+tiempoBusquedaSeguidores = 10
 tiempoVaciarBasura = 100
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
@@ -222,7 +223,7 @@ a = _thread.start_new_thread(iniciarCorredores,(lora,s,tiempoVaciarBasura,))
 time.sleep(0.3)
 b = _thread.start_new_thread(inciarAlertas,(lora,s,))
 time.sleep(0.2)
-c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEnvioSeguidores,))
+c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEntreEnvioSeguidores,tiempoBusquedaSeguidores,))
 time.sleep(0.3)
 #Pendiente implantacion:
 _thread.start_new_thread(escucharBaseRepetidora,())
