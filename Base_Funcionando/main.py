@@ -86,7 +86,7 @@ def enviarAlertas(s,listalertas=[]):
             print("Asi esta la lista: ",listalertas)
     return listalertas
 
-def inciarAlertas(lora,s):
+def inciarAlertas(lora,s,tiempoEntreEnvioAlertas,tiempoBusquedaAlertas):
     listalertas=[]
     s.setblocking(False)
     tiempo=time.time()
@@ -95,24 +95,24 @@ def inciarAlertas(lora,s):
     print('2-> Iniciamos seguno hilo con la busqueda de alertas:')
     while True:
         try:
-            time.sleep(30)
+            time.sleep(tiempoBusquedaAlertas)
             tiempo=time.time()
             if existe('alertas.txt'):
                 if re==0:
                     listalertas = enviarAlertas(s,listalertas)
-                    tmp2=tiempo
-                    re+=1
-                elif tiempo-tmp2>=60 and re !=0:
-                    tmp2=tiempo
+                    tmp2 = tiempo
+                    re+ = 1
+                elif tiempo - tmp2 >= tiempoEntreEnvioAlertas and re != 0:
+                    tmp2 = tiempo
                     print("Reenviando la lista de alertas")
                     del listalertas[:] #Borro la lista y reenvio leyendo de nuevo.
                     listalertas = enviarAlertas(s,listalertas)
                 else:
-                    print("Alertas existe, pero aun no ha pasado los 60 segundos=", tiempo-tmp2)
+                    print("Alertas existe, pero aun no ha pasado los {} segundos=" .format(tiempoEntreEnvioAlertas) , tiempo-tmp2 )
             else:
                 print("- No hay alertas(Archivo 'alertas.txt' no existe.)")
                 del listalertas[:]
-                re=0
+                re = 0
         except:
             print("*** - Algo ha fallado en IniciarAlertas - ***")
 
@@ -209,6 +209,8 @@ def escucharBaseRepetidora():
 pssid = "Gateway1"
 tiempoEntreEnvioSeguidores = 110
 tiempoBusquedaSeguidores = 10
+tiempoBusquedaAlertas = 15
+tiempoEntreEnvioAlertas = 65
 tiempoVaciarBasura = 100
 lora = LoRa(mode=LoRa.LORA)
 s = socket.socket(socket.AF_LORA, socket.SOCK_RAW)
@@ -221,7 +223,7 @@ iniciarWifi(pssid)
 time.sleep(0.2)
 a = _thread.start_new_thread(iniciarCorredores,(lora,s,tiempoVaciarBasura,))
 time.sleep(0.3)
-b = _thread.start_new_thread(inciarAlertas,(lora,s,))
+b = _thread.start_new_thread(inciarAlertas,(lora,s,tiempoEntreEnvioAlertas,tiempoBusquedaAlertas,))
 time.sleep(0.2)
 c = _thread.start_new_thread(iniciarSeguidores,(lora,s,tiempoEntreEnvioSeguidores,tiempoBusquedaSeguidores,))
 time.sleep(0.3)
