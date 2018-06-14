@@ -101,50 +101,58 @@ def inciarAlertas(lora,s,tiempoEntreEnvioAlertas,tiempoBusquedaAlertas):
                 if re==0:
                     listalertas = enviarAlertas(s,listalertas)
                     tmp2 = tiempo
-                    re+ = 1
+                    re += 1
                 elif tiempo - tmp2 >= tiempoEntreEnvioAlertas and re != 0:
                     tmp2 = tiempo
                     print("Reenviando la lista de alertas")
                     del listalertas[:] #Borro la lista y reenvio leyendo de nuevo.
                     listalertas = enviarAlertas(s,listalertas)
                 else:
-                    print("Alertas existe, pero aun no ha pasado los {} segundos=" .format(tiempoEntreEnvioAlertas) , tiempo-tmp2 )
+                    print("Alertas existe, pero aun no ha pasado los {} segundos =" .format(tiempoEntreEnvioAlertas) , tiempo-tmp2 )
             else:
                 print("- No hay alertas(Archivo 'alertas.txt' no existe.)")
                 del listalertas[:]
                 re = 0
         except:
             print("*** - Algo ha fallado en IniciarAlertas - ***")
+            
+def enviarSeguidores(s):
+    a = open('seguidores.txt')
+    j = a.read()
+    j = j.replace('\r','')
+    j = j.replace('\n','')
+    j = j.strip("|")
+    j = j.split("|")
+    b = len(j)
+    print("N seguidores",b)
+    for x in range(b):
+        msg = "seguidores-"+j[x]
+        s.send(msg)
+        print("Mensaje enviado:",msg)
+        ConfirmacionLed('sendalert')
 
 def iniciarSeguidores(lora,s,tiempoEntreEnvioSeguidores,tiempoBusquedaSeguidores):
     s.setblocking(False)
     tiempo = time.time()
     tmp = tiempo
+    enviado = 0
     print('3-> Iniciamos el tercer hilo con la busqueda de seguidores')
     while True:
         try:
             time.sleep(tiempoBusquedaSeguidores)
             tiempo = time.time()
             if existe('seguidores.txt'):
-                if tiempo - tmp >= tiempoEntreEnvioSeguidores:
+                if enviado == 0:
+                    enviarSeguidores(s)
+                    enviado = 1
+                elif tiempo - tmp >= tiempoEntreEnvioSeguidores and enviado != 0:
                     tmp = tiempo
-                    a = open('seguidores.txt')
-                    j = a.read()
-                    j = j.replace('\r','')
-                    j = j.replace('\n','')
-                    j = j.strip("|")
-                    j = j.split("|")
-                    b = len(j)
-                    print("N seguidores",b)
-                    for x in range(b):
-                        msg = "seguidores-"+j[x]
-                        s.send(msg)
-                        print("Mensaje enviado:",msg)
-                        ConfirmacionLed('sendalert')
+                    enviarSeguidores(s)
                 else:
-                    print("Seguidores.txt existe pero Aun no han pasado X segundos",tiempo-tmp)
+                    print("Seguidores.txt existe pero Aun no han pasado {} segundos = " .format(tiempoEntreEnvioSeguidores),tiempo-tmp)
             else:
                 print("- No hay Seguidores(Archivo 'seguidores.txt' no existe.)")
+                enviado = 0
         except:
             print('*** - Algo ha fallado en IniciarSeguidores - ***')
 
